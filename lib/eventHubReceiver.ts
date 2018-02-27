@@ -14,8 +14,8 @@ export class EventHubReceiver extends EventEmitter {
     const self = this;
     self._receiver = receiver;
 
-    function onMessage(message: any) {
-      var evData = EventData.fromAmqpMessage(message);
+    function onMessage(context: any) {
+      var evData = EventData.fromAmqpMessage(context.message);
       self.emit('message', evData);
     }
 
