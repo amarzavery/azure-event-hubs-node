@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const connectionConfig_1 = require("./connectionConfig");
 const rheaPromise = require("./rhea-promise");
 const rhea = require("rhea");
 const uuid = require("uuid");
+const _1 = require(".");
 /**
  * Instantiate a client pointing to the Event Hub given by this configuration.
  *
@@ -21,7 +21,7 @@ class EventHubClient {
      * @param {string} [path] - Event Hub path of the form 'my-event-hub-name'
      */
     static fromConnectionString(connectionString, path) {
-        const config = new connectionConfig_1.ConnectionConfig(connectionString, path);
+        const config = new _1.ConnectionConfig(connectionString, path);
         if (!config.entityPath) {
             throw new Error(`Either the connectionString must have "EntityPath=<path-to-entity>" or you must provide "path", while creating the client`);
         }
@@ -154,7 +154,7 @@ class EventHubClient {
         let connection = await this.open();
         let senderSession = await rheaPromise.createSession(connection);
         let sender = await rheaPromise.createSender(senderSession, this._config.entityPath);
-        return Promise.resolve(sender);
+        return Promise.resolve(new _1.EventHubSender(sender));
     }
     /**
      * Creates a receiver for the given event hub, consumer group, and partition.
@@ -197,7 +197,7 @@ class EventHubClient {
         let connection = await this.open();
         let receiverSession = await rheaPromise.createSession(connection);
         let receiver = await rheaPromise.createReceiver(receiverSession, receiverAddress, rcvrOptions);
-        return Promise.resolve(receiver);
+        return Promise.resolve(new _1.EventHubReceiver(receiver));
     }
 }
 exports.EventHubClient = EventHubClient;

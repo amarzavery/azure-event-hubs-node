@@ -1,7 +1,7 @@
 import { EventHubClient } from "../lib/index";
 
-const str = "Endpoint=sb://testeh12.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Ykhm3ZZV+SoGlW/EAYTo0lKYKJPHgSWb+Lp5jcaLCWg=";
-const path = "test1";
+const str = process.env["SB_CONNECTION_STRING"] || "";
+const path = process.env["ENTITY_PATH"] || "";
 
 
 async function main(): Promise<void> {

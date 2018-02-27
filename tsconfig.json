@@ -9,7 +9,7 @@
     "moduleResolution": "node",
     "noImplicitReturns": true,
     "noImplicitThis": true,
-    "outDir": "dist/lib",
+    "outDir": "dist",
     "allowJs": false,
     "strict": true,
     "strictNullChecks": true,
@@ -32,6 +32,7 @@
     "node_modules"
   ],
   "include": [
-    "./lib/**/*.ts"
+    "./lib/**/*.ts",
+    "./examples"
   ]
 }
