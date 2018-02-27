@@ -1,8 +1,7 @@
-import { ConnectionConfig } from "./connectionConfig";
 import * as rheaPromise from "./rhea-promise";
 import * as rhea from "rhea";
 import * as uuid from "uuid";
-import { EventHubReceiver, EventHubSender } from ".";
+import { EventHubReceiver, EventHubSender, ConnectionConfig } from ".";
 
 interface ReceiveOptions {
   startAfterTime?: Date | number;
@@ -228,7 +227,7 @@ class EventHubClient {
     let connection = await this.open();
     let senderSession = await rheaPromise.createSession(connection);
     let sender = await rheaPromise.createSender(senderSession, this._config.entityPath as string);
-    return Promise.resolve(sender);
+    return Promise.resolve(new EventHubSender(sender));
   }
 
   /**
@@ -271,7 +270,7 @@ class EventHubClient {
     let connection = await this.open();
     let receiverSession = await rheaPromise.createSession(connection);
     let receiver = await rheaPromise.createReceiver(receiverSession, receiverAddress, rcvrOptions);
-    return Promise.resolve(receiver);
+    return Promise.resolve(new EventHubReceiver(receiver));
   }
 }
 
