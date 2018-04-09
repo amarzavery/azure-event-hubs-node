@@ -128,12 +128,10 @@ class EventHubSender extends events_1.EventEmitter {
             if (!this._session && !this._sender) {
                 throw _1.Errors.translate({ condition: _1.Errors.ConditionStatusMapper[404], description: "The messaging entity underlying amqp sender could not be found." });
             }
-            let message = _1.EventData.toAmqpMessage(data);
             if (partitionKey) {
-                if (!message.message_annotations)
-                    message.message_annotations = {};
-                message.message_annotations[Constants.partitionKey] = partitionKey;
+                data.partitionKey = partitionKey;
             }
+            let message = _1.EventData.toAmqpMessage(data);
             return await this._trySend(message);
         }
         catch (err) {
@@ -161,13 +159,10 @@ class EventHubSender extends events_1.EventEmitter {
             let messages = [];
             // Convert EventData to AmqpMessage.
             for (let i = 0; i < datas.length; i++) {
-                let message = _1.EventData.toAmqpMessage(datas[i]);
                 if (partitionKey) {
-                    if (!message.message_annotations)
-                        message.message_annotations = {};
-                    message.message_annotations[Constants.partitionKey] = partitionKey;
+                    datas[i].partitionKey = partitionKey;
                 }
-                messages[i] = message;
+                messages[i] = _1.EventData.toAmqpMessage(datas[i]);
             }
             // Encode every amqp message and then convert every encoded message to amqp data section
             let batchMessage = {

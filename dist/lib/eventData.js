@@ -3,6 +3,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 Object.defineProperty(exports, "__esModule", { value: true });
 const Constants = require("./util/constants");
+const rhea = require("rhea");
 var EventData;
 (function (EventData) {
     function fromAmqpMessage(msg) {
@@ -12,11 +13,12 @@ var EventData;
             _raw_amqp_mesage: msg
         };
         if (msg.message_annotations) {
-            data.annotations = msg.message_annotations;
-            data.partitionKey = msg.message_annotations[Constants.partitionKey];
-            data.sequenceNumber = msg.message_annotations[Constants.sequenceNumber];
-            data.enqueuedTimeUtc = new Date(msg.message_annotations[Constants.enqueuedTime]);
-            data.offset = msg.message_annotations[Constants.offset];
+            let annotations = rhea.types.unwrap_map_simple(msg.message_annotations);
+            data.annotations = annotations;
+            data.partitionKey = annotations[Constants.partitionKey];
+            data.sequenceNumber = annotations[Constants.sequenceNumber];
+            data.enqueuedTimeUtc = new Date(annotations[Constants.enqueuedTime]);
+            data.offset = annotations[Constants.offset];
         }
         if (msg.properties) {
             data.properties = msg.properties;
@@ -85,6 +87,9 @@ var EventData;
             if (!msg.delivery_annotations)
                 msg.delivery_annotations = {};
             msg.delivery_annotations.runtime_info_retrieval_time_utc = data.retrievalTime.getTime();
+        }
+        if (msg.message_annotations) {
+            msg.message_annotations = rhea.types.wrap_symbolic_map(msg.message_annotations);
         }
         return msg;
     }
