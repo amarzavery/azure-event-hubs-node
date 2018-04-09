@@ -3,7 +3,7 @@
 
 import * as chai from "chai";
 chai.should();
-
+import * as rhea from "rhea";
 import { EventData, AmqpMessage } from "../lib";
 
 const testAnnotations = {
@@ -12,6 +12,8 @@ const testAnnotations = {
   "x-opt-sequence-number": 1337,
   "x-opt-partition-key": "key"
 };
+
+const wrappedAnnotations = rhea.types.wrap_symbolic_map(testAnnotations);
 
 const testBody = "{ \"foo\": \"bar\" }";
 
@@ -25,7 +27,7 @@ const applicationProperties = {
 
 const testMessage: AmqpMessage = {
   body: testBody,
-  message_annotations: testAnnotations,
+  message_annotations: wrappedAnnotations,
   properties: messageProperties,
   application_properties: applicationProperties
 };

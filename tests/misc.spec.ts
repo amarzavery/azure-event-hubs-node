@@ -107,7 +107,7 @@ describe("Misc tests", function () {
       let datas = await receiver.receive(50, 10);
       debug(`Received ${datas.length} messages from partition ${id}.`);
       for (let d of datas) {
-        debug(">>>> _raw_amqp_mesage: ", d._raw_amqp_mesage)
+        debug(">>>> event data: ", d);
         const pk = d.partitionKey as string;
         debug("pk: ", pk);
         if (partitionMap[pk] && partitionMap[pk] !== id) {
