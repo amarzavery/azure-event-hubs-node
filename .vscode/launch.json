@@ -17,7 +17,7 @@
                 "-t",
                 "999999",
                 "--colors",
-                "${workspaceFolder}/tests/client.spec.ts"
+                "${workspaceFolder}/tests/misc.spec.ts"
             ],
             "internalConsoleOptions": "openOnSessionStart",
             "envFile": "${workspaceFolder}/.env" // You can take a look at the sample.enve file for supported environment variables.
@@ -26,7 +26,7 @@
             "type": "node",
             "request": "launch",
             "name": "Run Example",
-            "program": "${workspaceFolder}/examples/simpleSendReceive.ts",
+            "program": "${workspaceFolder}/examples/iterableReceive.ts",
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
             ],

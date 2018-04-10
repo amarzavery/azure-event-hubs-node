@@ -1,6 +1,18 @@
 "use strict";
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
+var __await = (this && this.__await) || function (v) { return this instanceof __await ? (this.v = v, this) : new __await(v); }
+var __asyncGenerator = (this && this.__asyncGenerator) || function (thisArg, _arguments, generator) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var g = generator.apply(thisArg, _arguments || []), i, q = [];
+    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);  }
+    function fulfill(value) { resume("next", value); }
+    function reject(value) { resume("throw", value); }
+    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const rhea = require("rhea");
 const debugModule = require("debug");
@@ -11,6 +23,8 @@ const events_1 = require("events");
 const _1 = require(".");
 const utils_1 = require("./util/utils");
 const debug = debugModule("azure:event-hubs:receiver");
+if (Symbol["asyncIterator"] === undefined)
+    Symbol["asyncIterator"] = Symbol.for("asyncIterator");
 /**
  * Describes the EventHubReceiver that will receive event data from EventHub.
  * @class EventHubReceiver
@@ -67,7 +81,7 @@ class EventHubReceiver extends events_1.EventEmitter {
         const onError = async (context) => {
             // Since the receiver received an error the link has been closed. So calling
             // this.close() will ensure that the receiver has been removed from the context.
-            await this.close();
+            // await this.close();
             this.emit(Constants.error, errors.translate(context.receiver.error));
         };
         this.on("newListener", (event) => {
@@ -181,7 +195,7 @@ class EventHubReceiver extends events_1.EventEmitter {
      * to receiver the said amount of messages. If not provided, it defaults to 60 seconds.
      * @returns {Promise<EventData[]>} A promise that resolves with an array of EventData objects.
      */
-    async receive(maxMessageCount, maxWaitTimeInSeconds) {
+    receive(maxMessageCount, maxWaitTimeInSeconds) {
         if (!maxMessageCount || (maxMessageCount && typeof maxMessageCount !== 'number')) {
             throw new Error("'maxMessageCount' is a required parameter of type number with a value greater than 0.");
         }
@@ -191,56 +205,116 @@ class EventHubReceiver extends events_1.EventEmitter {
         if (!this._session && !this._receiver) {
             throw _1.Errors.translate({ condition: _1.Errors.ConditionStatusMapper[404], description: "The messaging entity underlying amqp receiver could not be found." });
         }
-        try {
-            let eventDatas = [];
-            let count = 0;
-            let timeOver = false;
-            return new Promise((resolve, reject) => {
-                let onReceiveMessage;
-                let waitTimer;
-                let actionAfterWaitTimeout;
-                // Final action to be performed after maxMessageCount is reached or the maxWaitTime is over.
-                const finalAction = (timeOver, data) => {
-                    // Remove the listener to avoid receiving duplicate messages.
-                    this.removeListener(Constants.message, onReceiveMessage);
-                    if (!data) {
-                        data = eventDatas.length ? eventDatas[eventDatas.length - 1] : undefined;
-                    }
-                    if (timeOver) {
-                        clearTimeout(waitTimer);
-                    }
-                    if (this.receiverRuntimeMetricEnabled && data) {
-                        this.runtimeInfo.lastSequenceNumber = data.lastSequenceNumber;
-                        this.runtimeInfo.lastEnqueuedTimeUtc = data.lastEnqueuedTime;
-                        this.runtimeInfo.lastEnqueuedOffset = data.lastEnqueuedOffset;
-                        this.runtimeInfo.retrievalTime = data.retrievalTime;
-                    }
-                    resolve(eventDatas);
-                };
-                // Action to be performed after the max wait time is over.
-                actionAfterWaitTimeout = () => {
-                    timeOver = true;
-                    finalAction(timeOver);
-                };
-                // Action to be performed on the "message" event.
-                onReceiveMessage = (data) => {
-                    if (!timeOver && count <= maxMessageCount) {
-                        count++;
-                        // console.log(`${new Date().toString()} - ${count}`);
-                        eventDatas.push(data);
-                    }
-                    if (count === maxMessageCount) {
-                        finalAction(timeOver, data);
-                    }
-                };
-                waitTimer = setTimeout(actionAfterWaitTimeout, maxWaitTimeInSeconds * 1000);
-                this.on(Constants.message, onReceiveMessage);
-            });
-        }
-        catch (err) {
-            return Promise.reject(err);
-        }
+        let eventDatas = [];
+        let count = 0;
+        let timeOver = false;
+        return new Promise((resolve, reject) => {
+            let onReceiveMessage;
+            let waitTimer;
+            let actionAfterWaitTimeout;
+            // Final action to be performed after maxMessageCount is reached or the maxWaitTime is over.
+            const finalAction = (timeOver, data) => {
+                // Remove the listener to avoid receiving duplicate messages.
+                this.removeListener(Constants.message, onReceiveMessage);
+                if (!data) {
+                    data = eventDatas.length ? eventDatas[eventDatas.length - 1] : undefined;
+                }
+                if (timeOver) {
+                    clearTimeout(waitTimer);
+                }
+                if (this.receiverRuntimeMetricEnabled && data) {
+                    this.runtimeInfo.lastSequenceNumber = data.lastSequenceNumber;
+                    this.runtimeInfo.lastEnqueuedTimeUtc = data.lastEnqueuedTime;
+                    this.runtimeInfo.lastEnqueuedOffset = data.lastEnqueuedOffset;
+                    this.runtimeInfo.retrievalTime = data.retrievalTime;
+                }
+                resolve(eventDatas);
+            };
+            // Action to be performed after the max wait time is over.
+            actionAfterWaitTimeout = () => {
+                timeOver = true;
+                finalAction(timeOver);
+            };
+            // Action to be performed on the "message" event.
+            onReceiveMessage = (data) => {
+                if (!timeOver && count <= maxMessageCount) {
+                    count++;
+                    console.log(`${new Date().toString()} - ${count}`);
+                    eventDatas.push(data);
+                }
+                if (count === maxMessageCount) {
+                    finalAction(timeOver, data);
+                }
+            };
+            waitTimer = setTimeout(actionAfterWaitTimeout, maxWaitTimeInSeconds * 1000);
+            // Action to be taken when an error is received.
+            const onHandleError = (error) => {
+                debug(`[${this._context.connectionId}] Receiver "${this.name}" received an error: \n ${JSON.stringify(error, undefined, 2)}`);
+                this.removeListener(Constants.error, onHandleError);
+                this.removeListener(Constants.message, onReceiveMessage);
+                if (waitTimer) {
+                    clearTimeout(waitTimer);
+                }
+                reject(error);
+            };
+            this.on(Constants.error, onHandleError);
+            this.on(Constants.message, onReceiveMessage);
+        });
     }
+    // async*[Symbol["asyncIterator"]](): AsyncIterable<EventData> {
+    //   while (true) {
+    //     yield (await oncePromise<EventData>(this, "message"));
+    //   }
+    // }
+    receiveIterable() {
+        return __asyncGenerator(this, arguments, function* receiveIterable_1() {
+            let onReceiveError;
+            let errorReceived;
+            onReceiveError = (error) => {
+                this.removeListener(Constants.error, onReceiveError);
+                errorReceived = error;
+                // throw error;
+            };
+            if (errorReceived) {
+                console.log("Back herere!!!!!!!!");
+                throw errorReceived;
+            }
+            this.on(Constants.error, onReceiveError);
+            while (!errorReceived) {
+                if (errorReceived) {
+                    console.log("Back herere!!!!!!!!");
+                    throw errorReceived;
+                }
+                yield (yield __await(utils_1.oncePromise(this, "message")));
+                console.log("Hererererererere```````````````````````````````````````````");
+            }
+        });
+    }
+    // async* receiveIterable(): AsyncIterable<EventData> {
+    //   const self = this;
+    //   async function* onReceiveMessage(data: EventData): AsyncIterableIterator<EventData> {
+    //     console.log(data);
+    //     await data;
+    //   }
+    //   function onReceiveError(error: any): void {
+    //     self.removeListener(Constants.message, onReceiveMessage);
+    //     self.removeListener(Constants.error, onReceiveError);
+    //     console.log(error);
+    //     throw error;
+    //   }
+    //   this.on(Constants.error, onReceiveError);
+    //   this.on(Constants.message, onReceiveMessage);
+    // }
+    // async* receiveIterable(): AsyncIterable<EventData> {
+    //   let self = this;
+    //   return {
+    //     [Symbol.asyncIterator]: () => ({
+    //       next() {
+    //         return oncePromise<EventData>(self, "message")
+    //       }
+    //     })
+    //   };
+    // }
     /**
      * Closes the underlying AMQP receiver.
      */
@@ -263,6 +337,26 @@ class EventHubReceiver extends events_1.EventEmitter {
                 return Promise.reject(err);
             }
         }
+    }
+    _receive() {
+        return new Promise((resolve, reject) => {
+            let onReceiveMessage;
+            let onReceiveError;
+            // Action to be performed on the "message" event.
+            onReceiveMessage = (data) => {
+                this.removeListener(Constants.message, onReceiveMessage);
+                this.removeListener(Constants.error, onReceiveError);
+                resolve(data);
+            };
+            // Action to be performed on the "error" event.
+            onReceiveError = (error) => {
+                this.removeListener(Constants.message, onReceiveMessage);
+                this.removeListener(Constants.error, onReceiveError);
+                reject(error);
+            };
+            this.on(Constants.message, onReceiveMessage);
+            this.on(Constants.error, onReceiveError);
+        });
     }
     /**
      * Ensures that the token is renewed within the predfiend renewal margin.

@@ -32,4 +32,14 @@ function delay(t, value) {
     return new Promise((resolve) => setTimeout(() => resolve(value), t));
 }
 exports.delay = delay;
+function oncePromise(emitter, event) {
+    return new Promise((resolve) => {
+        const handler = (...args) => {
+            emitter.removeListener(event, handler);
+            resolve(...args);
+        };
+        emitter.on(event, handler);
+    });
+}
+exports.oncePromise = oncePromise;
 //# sourceMappingURL=utils.js.map

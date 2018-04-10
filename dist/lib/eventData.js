@@ -13,7 +13,7 @@ var EventData;
             _raw_amqp_mesage: msg
         };
         if (msg.message_annotations) {
-            let annotations = rhea.types.unwrap_map_simple(msg.message_annotations);
+            let annotations = msg.message_annotations.value ? rhea.types.unwrap_map_simple(msg.message_annotations) : msg.message_annotations;
             data.annotations = annotations;
             data.partitionKey = annotations[Constants.partitionKey];
             data.sequenceNumber = annotations[Constants.sequenceNumber];

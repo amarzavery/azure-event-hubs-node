@@ -52,18 +52,18 @@ async function closeConnection(connection) {
             reject(new Error("connection is a required parameter and must be of tyepe 'object'."));
         }
         if (connection.is_open()) {
-            function onClose(context) {
+            const onClose = (context) => {
                 connection.removeListener("connection_close", onClose);
                 process.nextTick(() => {
                     debug("Resolving the promise as the connection has been successfully closed.");
                     resolve();
                 });
-            }
-            function onError(context) {
+            };
+            const onError = (context) => {
                 connection.removeListener("connection_error", onError);
                 debug(`Error occurred while closing amqp connection.`, context.connection.error);
                 reject(context.connection.error);
-            }
+            };
             connection.once("connection_close", onClose);
             connection.once("connection_error", onError);
             connection.close();
@@ -88,20 +88,20 @@ async function createSession(connection) {
             reject(new Error("connection is a required parameter and must be of tyepe 'object'."));
         }
         const session = connection.create_session();
-        function onOpen(context) {
+        const onOpen = (context) => {
             session.removeListener("session_open", onOpen);
             session.removeListener("session_close", onClose);
             process.nextTick(() => {
                 debug("Resolving the promise with amqp session.");
                 resolve(session);
             });
-        }
-        function onClose(context) {
+        };
+        const onClose = (context) => {
             session.removeListener("session_open", onOpen);
             session.removeListener("session_close", onClose);
             debug(`Error occurred while establishing a session over amqp connection.`, context.session.error);
             reject(context.session.error);
-        }
+        };
         session.once("session_open", onOpen);
         session.once("session_close", onClose);
         debug("Calling amqp session.begin().");
@@ -123,18 +123,18 @@ async function closeSession(session) {
             reject(new Error("session is a required parameter and must be of tyepe 'object'."));
         }
         if (session.is_open()) {
-            function onClose(context) {
+            const onClose = (context) => {
                 session.removeListener("session_close", onClose);
                 process.nextTick(() => {
                     debug("Resolving the promise as the amqp session has been closed.");
                     resolve();
                 });
-            }
-            function onError(context) {
+            };
+            const onError = (context) => {
                 session.removeListener("session_error", onError);
                 debug(`Error occurred while closing amqp session.`, context.session.error);
                 reject(context.session.error);
-            }
+            };
             session.once("session_close", onClose);
             session.once("session_error", onError);
             session.close();
@@ -160,20 +160,20 @@ async function createSender(session, options) {
             reject(new Error("session is a required parameter and must be of tyepe 'object'."));
         }
         const sender = session.attach_sender(options);
-        function onOpen(context) {
+        const onOpen = (context) => {
             sender.removeListener("sendable", onOpen);
             sender.removeListener("sender_close", onClose);
             process.nextTick(() => {
                 debug(`Resolving the promise with amqp sender "${sender.name}".`);
                 resolve(sender);
             });
-        }
-        function onClose(context) {
+        };
+        const onClose = (context) => {
             sender.removeListener("sendable", onOpen);
             sender.removeListener("sender_close", onClose);
             debug(`Error occurred while creating a sender over amqp connection.`, context.sender.error);
             reject(context.sender.error);
-        }
+        };
         sender.once("sendable", onOpen);
         sender.once("sender_close", onClose);
     });
@@ -193,18 +193,18 @@ async function closeSender(sender) {
             reject(new Error("sender is a required parameter and must be of tyepe 'object'."));
         }
         if (sender.is_open()) {
-            function onClose(context) {
+            const onClose = (context) => {
                 sender.removeListener("sender_close", onClose);
                 process.nextTick(() => {
                     debug("Resolving the promise as the amqp sender has been closed.");
                     resolve();
                 });
-            }
-            function onError(context) {
+            };
+            const onError = (context) => {
                 sender.removeListener("sender_error", onError);
                 debug(`Error occurred while closing amqp sender.`, context.sender.error);
                 reject(context.sender.error);
-            }
+            };
             sender.once("sender_close", onClose);
             sender.once("sender_error", onError);
             sender.close();
@@ -230,20 +230,20 @@ async function createReceiver(session, options) {
             reject(new Error("session is a required parameter and must be of tyepe 'object'."));
         }
         const receiver = session.attach_receiver(options);
-        function onOpen(context) {
+        const onOpen = (context) => {
             receiver.removeListener("receiver_open", onOpen);
             receiver.removeListener("receiver_close", onClose);
             process.nextTick(() => {
                 debug(`Resolving the promise with amqp receiver "${receiver.name}".`);
                 resolve(receiver);
             });
-        }
-        function onClose(context) {
+        };
+        const onClose = (context) => {
             receiver.removeListener("receiver_open", onOpen);
             receiver.removeListener("receiver_close", onClose);
             debug(`Error occurred while creating a receiver over amqp connection.`, context.receiver.error);
             reject(context.receiver.error);
-        }
+        };
         receiver.once("receiver_open", onOpen);
         receiver.once("receiver_close", onClose);
     });
@@ -263,18 +263,18 @@ async function closeReceiver(receiver) {
             reject(new Error("receiver is a required parameter and must be of tyepe 'object'."));
         }
         if (receiver.is_open()) {
-            function onClose(context) {
+            const onClose = (context) => {
                 receiver.removeListener("receiver_close", onClose);
                 process.nextTick(() => {
                     debug("Resolving the promise as the amqp receiver has been closed.");
                     resolve();
                 });
-            }
-            function onError(context) {
+            };
+            const onError = (context) => {
                 receiver.removeListener("receiver_error", onError);
                 debug(`Error occurred while closing amqp receiver.`, context.receiver.error);
                 reject(context.receiver.error);
-            }
+            };
             receiver.once("receiver_close", onClose);
             receiver.once("receiver_error", onError);
             receiver.close();

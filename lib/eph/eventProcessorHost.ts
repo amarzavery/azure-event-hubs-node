@@ -4,7 +4,7 @@
 import * as uuid from "uuid/v4";
 import * as debugModule from "debug";
 import BlobLeaseManager, { LeaseManager } from "./blobLeaseManager";
-import BlobLease from "./blobLease";
+import BlobLease, { Lease } from "./blobLease";
 import PartitionContext from "./partitionContext";
 import { EventHubClient } from "../eventHubClient";
 import { EventEmitter } from "events";
@@ -201,7 +201,7 @@ export default class EventProcessorHost extends EventEmitter {
    * @return {Promise<void>}
    */
   async stop(): Promise<void> {
-    const unmanage = (l) => { return this._leaseManager.unmanageLease(l); };
+    const unmanage = (l: Lease) => { return this._leaseManager.unmanageLease(l); };
     let releases: any = [];
     for (const partitionId in this._contextByPartition!) {
       if (!this._contextByPartition!.hasOwnProperty(partitionId)) continue;

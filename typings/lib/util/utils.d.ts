@@ -1,5 +1,7 @@
 /// <reference types="async-lock" />
+/// <reference types="node" />
 import * as AsyncLock from "async-lock";
+import { EventEmitter } from "events";
 export interface AsyncLockOptions {
     /**
      * @property {number} [timeout] The max timeout. Default is: 0 (never timeout).
@@ -43,3 +45,4 @@ export declare const defaultLock: AsyncLock;
  */
 export declare function delay<T>(t: number, value?: T): Promise<T>;
 export declare type Func<T, V> = (a: T) => V;
+export declare function oncePromise<T>(emitter: EventEmitter, event: string): Promise<T>;

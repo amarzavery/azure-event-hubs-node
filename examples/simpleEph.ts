@@ -9,7 +9,7 @@ const str = process.env[connectionString] || "";
 const path = process.env[entityPath] || "";
 const storage = "STORAGE_CONNECTION_STRING";
 const storageStr = process.env[storage] || "";
-let partitions = {};
+let partitions: any = {};
 //let msgId = uuid();
 let ehc = EventHubClient.createFromConnectionString(str, path);
 async function main(): Promise<void> {

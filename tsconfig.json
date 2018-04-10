@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "alwaysStrict": true,
     "module": "commonjs",
     "preserveConstEnums": true,
     "sourceMap": true,
@@ -8,14 +7,14 @@
     "target": "es2017",
     "moduleResolution": "node",
     "noImplicitReturns": true,
-    "noImplicitThis": true,
     "outDir": "dist",
     "allowJs": false,
     "noUnusedLocals":true,
-    "strictNullChecks": true,
+    "strict": false,
     "strictPropertyInitialization": true,
     "declaration": true,
     "declarationDir": "./typings",
+    "downlevelIteration": true,
     "lib": [
       "es2015",
       "dom",
@@ -30,7 +29,7 @@
   },
   "compileOnSave": true,
   "exclude": [
-    "node_modules",
+    "node_modules/",
     "testhub",
     "typings/**"
   ],

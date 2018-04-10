@@ -57,19 +57,19 @@ export async function closeConnection(connection: any): Promise<void> {
     }
 
     if (connection.is_open()) {
-      function onClose(context: Context): void {
+      const onClose = (context: Context): void => {
         connection.removeListener("connection_close", onClose);
         process.nextTick(() => {
           debug("Resolving the promise as the connection has been successfully closed.");
           resolve();
         });
-      }
+      };
 
-      function onError(context: Context): void {
+      const onError = (context: Context): void => {
         connection.removeListener("connection_error", onError);
         debug(`Error occurred while closing amqp connection.`, context.connection.error);
         reject(context.connection.error);
-      }
+      };
 
       connection.once("connection_close", onClose);
       connection.once("connection_error", onError);
@@ -96,21 +96,21 @@ export async function createSession(connection: any): Promise<any> {
 
     const session = connection.create_session();
 
-    function onOpen(context: any): void {
+    const onOpen = (context: any): void => {
       session.removeListener("session_open", onOpen);
       session.removeListener("session_close", onClose);
       process.nextTick(() => {
         debug("Resolving the promise with amqp session.");
         resolve(session);
       });
-    }
+    };
 
-    function onClose(context: Context): void {
+    const onClose = (context: Context): void => {
       session.removeListener("session_open", onOpen);
       session.removeListener("session_close", onClose);
       debug(`Error occurred while establishing a session over amqp connection.`, context.session.error);
       reject(context.session.error);
-    }
+    };
 
     session.once("session_open", onOpen);
     session.once("session_close", onClose);
@@ -134,19 +134,19 @@ export async function closeSession(session: any): Promise<void> {
     }
 
     if (session.is_open()) {
-      function onClose(context: Context): void {
+      const onClose = (context: Context): void => {
         session.removeListener("session_close", onClose);
         process.nextTick(() => {
           debug("Resolving the promise as the amqp session has been closed.");
           resolve();
         });
-      }
+      };
 
-      function onError(context: Context): void {
+      const onError = (context: Context): void => {
         session.removeListener("session_error", onError);
         debug(`Error occurred while closing amqp session.`, context.session.error);
         reject(context.session.error);
-      }
+      };
 
       session.once("session_close", onClose);
       session.once("session_error", onError);
@@ -174,21 +174,21 @@ export async function createSender(session: any, options?: SenderOptions): Promi
 
     const sender = session.attach_sender(options);
 
-    function onOpen(context: any): void {
+    const onOpen = (context: any): void => {
       sender.removeListener("sendable", onOpen);
       sender.removeListener("sender_close", onClose);
       process.nextTick(() => {
         debug(`Resolving the promise with amqp sender "${sender.name}".`);
         resolve(sender);
       });
-    }
+    };
 
-    function onClose(context: Context): void {
+    const onClose = (context: Context): void => {
       sender.removeListener("sendable", onOpen);
       sender.removeListener("sender_close", onClose);
       debug(`Error occurred while creating a sender over amqp connection.`, context.sender.error);
       reject(context.sender.error);
-    }
+    };
 
     sender.once("sendable", onOpen);
     sender.once("sender_close", onClose);
@@ -209,19 +209,19 @@ export async function closeSender(sender: any): Promise<void> {
       reject(new Error("sender is a required parameter and must be of tyepe 'object'."));
     }
     if (sender.is_open()) {
-      function onClose(context: Context): void {
+      const onClose = (context: Context): void => {
         sender.removeListener("sender_close", onClose);
         process.nextTick(() => {
           debug("Resolving the promise as the amqp sender has been closed.");
           resolve();
         });
-      }
+      };
 
-      function onError(context: Context): void {
+      const onError = (context: Context): void => {
         sender.removeListener("sender_error", onError);
         debug(`Error occurred while closing amqp sender.`, context.sender.error);
         reject(context.sender.error);
-      }
+      };
 
       sender.once("sender_close", onClose);
       sender.once("sender_error", onError);
@@ -249,21 +249,21 @@ export async function createReceiver(session: any, options?: ReceiverOptions): P
 
     const receiver = session.attach_receiver(options);
 
-    function onOpen(context: any): void {
+    const onOpen = (context: any): void => {
       receiver.removeListener("receiver_open", onOpen);
       receiver.removeListener("receiver_close", onClose);
       process.nextTick(() => {
         debug(`Resolving the promise with amqp receiver "${receiver.name}".`);
         resolve(receiver);
       });
-    }
+    };
 
-    function onClose(context: Context): void {
+    const onClose = (context: Context): void => {
       receiver.removeListener("receiver_open", onOpen);
       receiver.removeListener("receiver_close", onClose);
       debug(`Error occurred while creating a receiver over amqp connection.`, context.receiver.error);
       reject(context.receiver.error);
-    }
+    };
 
     receiver.once("receiver_open", onOpen);
     receiver.once("receiver_close", onClose);
@@ -285,19 +285,19 @@ export async function closeReceiver(receiver: any): Promise<void> {
     }
 
     if (receiver.is_open()) {
-      function onClose(context: Context): void {
+      const onClose = (context: Context): void => {
         receiver.removeListener("receiver_close", onClose);
         process.nextTick(() => {
           debug("Resolving the promise as the amqp receiver has been closed.");
           resolve();
         });
-      }
+      };
 
-      function onError(context: Context): void {
+      const onError = (context: Context): void => {
         receiver.removeListener("receiver_error", onError);
         debug(`Error occurred while closing amqp receiver.`, context.receiver.error);
         reject(context.receiver.error);
-      }
+      };
 
       receiver.once("receiver_close", onClose);
       receiver.once("receiver_error", onError);

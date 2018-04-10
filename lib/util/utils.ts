@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 import * as AsyncLock from "async-lock";
+import { EventEmitter } from "events";
 
 export interface AsyncLockOptions {
   /**
@@ -64,3 +65,13 @@ export function delay<T>(t: number, value?: T): Promise<T> {
 }
 
 export type Func<T, V> = (a: T) => V;
+
+export function oncePromise<T>(emitter: EventEmitter, event: string): Promise<T> {
+  return new Promise<T>((resolve) => {
+    const handler = (...args: any[]) => {
+      emitter.removeListener(event, handler);
+      resolve(...args);
+    };
+    emitter.on(event, handler);
+  });
+}

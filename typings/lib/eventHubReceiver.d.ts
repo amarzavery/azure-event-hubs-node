@@ -141,10 +141,12 @@ export declare class EventHubReceiver extends EventEmitter {
      * @returns {Promise<EventData[]>} A promise that resolves with an array of EventData objects.
      */
     receive(maxMessageCount: number, maxWaitTimeInSeconds?: number): Promise<EventData[]>;
+    receiveIterable(): AsyncIterableIterator<EventData>;
     /**
      * Closes the underlying AMQP receiver.
      */
     close(): Promise<void>;
+    _receive(): Promise<EventData>;
     /**
      * Ensures that the token is renewed within the predfiend renewal margin.
      */

@@ -14,16 +14,16 @@ async function main() {
         console.log(">>> EventDataObject: ", eventData);
         console.log("### Actual message:", eventData.body ? eventData.body.toString() : null);
     });
-    const receiver2 = await client.createReceiver("0", { epoch: 1 });
-    receiver2.on("message", (eventData) => {
-        console.log("@@@@ receiver 2: ", receiver2.name);
-        console.log(">>> EventDataObject 2: ", eventData);
-        console.log("### Actual message 2:", eventData.body ? eventData.body.toString() : null);
-    });
-    receiver2.on("receiver_error", (err) => {
-        console.log("From the sample");
-        console.log(err);
-    });
+    // const receiver2 = await client.createReceiver("0", { epoch: 1 });
+    // receiver2.on("message", (eventData: any) => {
+    //   console.log("@@@@ receiver 2: ", receiver2.name);
+    //   console.log(">>> EventDataObject 2: ", eventData);
+    //   console.log("### Actual message 2:", eventData.body ? eventData.body.toString() : null);
+    // });
+    // receiver2.on("receiver_error", (err: any) => {
+    //   console.log("From the sample");
+    //   console.log(err);
+    // })
     // console.log("%%%%%%%%%%% Waiting for receiver 2")
     // setTimeout(async () => {
     //   const receiver2 = await client.createReceiver("0", { epoch: 1 });
