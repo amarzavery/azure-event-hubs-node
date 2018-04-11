@@ -4,7 +4,7 @@
 import * as uuid from "uuid/v4";
 import * as debugModule from "debug";
 import BlobLeaseManager, { LeaseManager } from "./blobLeaseManager";
-import BlobLease from "./blobLease";
+import BlobLease, { Lease } from "./blobLease";
 import PartitionContext from "./partitionContext";
 import { EventHubClient } from "../eventHubClient";
 import { EventEmitter } from "events";
@@ -45,7 +45,7 @@ export default class EventProcessorHost extends EventEmitter {
    */
   static opened: string = "ephost:opened";
   /**
-   * Triggered whenever a partition loses its lease and has to stop receiving,
+   * Closed: Triggered whenever a partition loses its lease and has to stop receiving,
    * or when the host is shut down. Passed the PartitionContext and the closing reason.
    */
   static closed: string = "ephost:closed";
@@ -54,6 +54,12 @@ export default class EventProcessorHost extends EventEmitter {
    * Passed the PartitionContext and EventData.
    */
   static message: string = "ephost:message";
+
+  /**
+   * Error: Triggered when an error occurs on a given receiver.
+   * Passed the received error.
+   */
+  static error: string = "ephost:error";
 
   private _hostName: string;
   private _consumerGroup: string;
@@ -201,7 +207,7 @@ export default class EventProcessorHost extends EventEmitter {
    * @return {Promise<void>}
    */
   async stop(): Promise<void> {
-    const unmanage = (l) => { return this._leaseManager.unmanageLease(l); };
+    const unmanage = (l: Lease) => { return this._leaseManager.unmanageLease(l); };
     let releases: any = [];
     for (const partitionId in this._contextByPartition!) {
       if (!this._contextByPartition!.hasOwnProperty(partitionId)) continue;
@@ -225,8 +231,12 @@ export default class EventProcessorHost extends EventEmitter {
     }
     const rcvrOptions: ReceiveOptions = { consumerGroup: this._consumerGroup, eventPosition: eventPosition };
     const receiver = await this._eventHubClient.createReceiver(partitionId, rcvrOptions);
-    debug(`[${this._eventHubClient.connectionId!}] Attaching receiver "${receiver.name}" ` +
+    debug(`[${this._eventHubClient.connectionId!}] [EPH "${this._hostName}"] Attaching receiver "${receiver.name}" ` +
       `for partition "${partitionId}" with offset: ${(checkpoint ? checkpoint.offset : "None")}`);
+    receiver.on("error", (error: any) => {
+      debug(`[${this._eventHubClient.connectionId!}] [EPH "${this._hostName}"] Receiver "${receiver.name}" received an error: `, error);
+      this.emit(EventProcessorHost.error, error);
+    });
     this.emit(EventProcessorHost.opened, context);
     this._receiverByPartition![partitionId] = receiver;
     receiver.on("message", (eventData: EventData) => {
@@ -242,7 +252,7 @@ export default class EventProcessorHost extends EventEmitter {
     if (receiver) {
       delete this._receiverByPartition![partitionId];
       await receiver.close();
-      debug(`[${this._eventHubClient.connectionId!}] Closed the receiver "${receiver.name}".`);
+      debug(`[${this._eventHubClient.connectionId!}] [EPH "${this._hostName}"] Closed the receiver "${receiver.name}".`);
       this.emit(EventProcessorHost.closed, context, reason);
     }
   }

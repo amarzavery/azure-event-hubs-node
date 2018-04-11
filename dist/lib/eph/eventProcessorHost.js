@@ -177,8 +177,12 @@ class EventProcessorHost extends events_1.EventEmitter {
         }
         const rcvrOptions = { consumerGroup: this._consumerGroup, eventPosition: eventPosition };
         const receiver = await this._eventHubClient.createReceiver(partitionId, rcvrOptions);
-        debug(`[${this._eventHubClient.connectionId}] Attaching receiver "${receiver.name}" ` +
+        debug(`[${this._eventHubClient.connectionId}] [EPH "${this._hostName}"] Attaching receiver "${receiver.name}" ` +
             `for partition "${partitionId}" with offset: ${(checkpoint ? checkpoint.offset : "None")}`);
+        receiver.on("error", (error) => {
+            debug(`[${this._eventHubClient.connectionId}] [EPH "${this._hostName}"] Receiver "${receiver.name}" received an error: `, error);
+            this.emit(EventProcessorHost.error, error);
+        });
         this.emit(EventProcessorHost.opened, context);
         this._receiverByPartition[partitionId] = receiver;
         receiver.on("message", (eventData) => {
@@ -193,7 +197,7 @@ class EventProcessorHost extends events_1.EventEmitter {
         if (receiver) {
             delete this._receiverByPartition[partitionId];
             await receiver.close();
-            debug(`[${this._eventHubClient.connectionId}] Closed the receiver "${receiver.name}".`);
+            debug(`[${this._eventHubClient.connectionId}] [EPH "${this._hostName}"] Closed the receiver "${receiver.name}".`);
             this.emit(EventProcessorHost.closed, context, reason);
         }
     }
@@ -245,7 +249,7 @@ class EventProcessorHost extends events_1.EventEmitter {
  */
 EventProcessorHost.opened = "ephost:opened";
 /**
- * Triggered whenever a partition loses its lease and has to stop receiving,
+ * Closed: Triggered whenever a partition loses its lease and has to stop receiving,
  * or when the host is shut down. Passed the PartitionContext and the closing reason.
  */
 EventProcessorHost.closed = "ephost:closed";
@@ -254,5 +258,10 @@ EventProcessorHost.closed = "ephost:closed";
  * Passed the PartitionContext and EventData.
  */
 EventProcessorHost.message = "ephost:message";
+/**
+ * Error: Triggered when an error occurs on a given receiver.
+ * Passed the received error.
+ */
+EventProcessorHost.error = "ephost:error";
 exports.default = EventProcessorHost;
 //# sourceMappingURL=eventProcessorHost.js.map

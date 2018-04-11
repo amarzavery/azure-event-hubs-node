@@ -34,7 +34,7 @@ export default class EventProcessorHost extends EventEmitter {
      */
     static opened: string;
     /**
-     * Triggered whenever a partition loses its lease and has to stop receiving,
+     * Closed: Triggered whenever a partition loses its lease and has to stop receiving,
      * or when the host is shut down. Passed the PartitionContext and the closing reason.
      */
     static closed: string;
@@ -43,6 +43,11 @@ export default class EventProcessorHost extends EventEmitter {
      * Passed the PartitionContext and EventData.
      */
     static message: string;
+    /**
+     * Error: Triggered when an error occurs on a given receiver.
+     * Passed the received error.
+     */
+    static error: string;
     private _hostName;
     private _consumerGroup;
     private _storageConnectionString;
