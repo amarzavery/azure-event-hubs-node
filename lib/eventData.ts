@@ -287,4 +287,25 @@ export namespace EventData {
     }
     return msg;
   }
+
+  /**
+   * Until version 0.0.8 a different format of the data object was returned compared to how the
+   * conversion happens right now. This helper method makes a best attempt at converting the body
+   * of the received event data from EventHub object.
+   * 
+   * @param {EventData} eventData The received EventData object from the Event Hub.
+   */
+  export function tryConvertEventDataBodyToString(eventData: EventData): string | undefined {
+    let result;
+    if (eventData) {
+      if (typeof eventData.body === "string")
+        result = eventData.body;
+      else if (eventData.body.content)
+        result = eventData.body.content.toString("utf8");
+      else if (Buffer.isBuffer(eventData.body))
+        result = eventData.body.toString("utf8");
+    }
+    console.log("The stringified body is: ", result);
+    return result;
+  }
 }

@@ -1,4 +1,4 @@
-import { EventHubClient, EventData, EventPosition, OnMessage, OnError, EventHubsError } from "azure-arm-event-hubs";
+import { EventHubClient, EventData, EventPosition, OnMessage, OnError, EventHubsError } from "../lib";
 
 const connectionString = "EVENTHUB_CONNECTION_STRING";
 const entityPath = "EVENTHUB_NAME";
@@ -27,8 +27,14 @@ async function main(): Promise<void> {
 
   const messageCount = 5;
   let datas: EventData[] = [];
+  const object = {
+    "id": "7a63aaa394c74c1182308f19d4c4cb79",
+    "name": "John",
+    "data": "{}",
+    "version": 1
+  };
   for (let i = 0; i < messageCount; i++) {
-    let obj: EventData = { body: `Hello foo ${i}` };
+    let obj: EventData = { body: object };
     datas.push(obj);
   }
   console.log("Sending batch message...");
