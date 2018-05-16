@@ -48,7 +48,6 @@ export class EventHubSender extends ClientEntity {
   /**
    * Sends the given message, with the given options on this link
    *
-   * @method send
    * @param {any} data Message to send.  Will be sent as UTF8-encoded JSON string.
    * @returns {Promise<rheaPromise.Delivery>} Promise<rheaPromise.Delivery>
    */
@@ -131,7 +130,7 @@ export class EventHubSender extends ClientEntity {
   /**
    * "Unlink" this sender, closing the link and resolving when that operation is complete.
    * Leaves the underlying connection open.
-   * @method close
+   *
    * @return {Promise<void>} Promise<void>
    */
   async close(): Promise<void> {

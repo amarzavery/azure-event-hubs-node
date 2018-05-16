@@ -97,8 +97,9 @@ export class ManagementClient extends ClientEntity {
   private _mgmtReqResLink?: RequestResponseLink;
 
   /**
-   * @constructor
    * Instantiates the management client.
+   *
+   * @constructor
    * @param {BaseConnectionContext} context The connection context.
    * @param {string} [address] The address for the management endpoint. For IotHub it will be
    * `/messages/events/$management`.
@@ -114,7 +115,7 @@ export class ManagementClient extends ClientEntity {
 
   /**
    * Provides the eventhub runtime information.
-   * @method getHubRuntimeInformation
+   *
    * @param {Connection} connection - The established amqp connection
    * @returns {Promise<EventHubRuntimeInformation>}
    */
@@ -133,7 +134,7 @@ export class ManagementClient extends ClientEntity {
 
   /**
    * Provides an array of partitionIds.
-   * @method getPartitionIds
+   *
    * @param {Connection} connection - The established amqp connection
    * @returns {Promise<Array<string>>}
    */
@@ -144,7 +145,7 @@ export class ManagementClient extends ClientEntity {
 
   /**
    * Provides information about the specified partition.
-   * @method getPartitionInformation
+   *
    * @param {Connection} connection - The established amqp connection
    * @param {(string|number)} partitionId Partition ID for which partition information is required.
    */

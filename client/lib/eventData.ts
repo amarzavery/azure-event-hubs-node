@@ -174,6 +174,40 @@ export interface AmqpMessageProperties {
    * @property {string} [reply_to_group_id] The group the reply message belongs to.
    */
   reply_to_group_id?: string;
+  /**
+   * @property {boolean} [first_acquirer] If this value is true, then this message has not been
+   * acquired by any other link. Ifthis value is false, then this message MAY have previously
+   * been acquired by another link or links.
+   */
+  first_acquirer?: boolean;
+  /**
+   * @property {number} [delivery_count] The number of prior unsuccessful delivery attempts.
+   */
+  delivery_count?: number;
+  /**
+   * @property {number} [ttl] time to live in ms.
+   */
+  ttl?: number;
+  /**
+   * @property {boolean} [durable] Specifies durability requirements.
+   */
+  durabe?: boolean;
+  /**
+   * @property {number} [priority] The relative message priority. Higher numbers indicate higher
+   * priority messages.
+   */
+  priority?: number;
+  /**
+   * @property {string} [subject] A common field for summary information about the message
+   * content and purpose.
+   */
+  subject?: string;
+  /**
+   * @property {string} [user_id] The identity of the user responsible for producing the message.
+   */
+  user_id?: string;
+
+
 }
 
 /**
@@ -181,8 +215,6 @@ export interface AmqpMessageProperties {
  * @interface AmqpMessage
  */
 export interface AmqpMessage extends AmqpMessageProperties {
-  // TODO: Ask Gordon about other AMQP message properties like durable, first_acquirer, etc.
-  // https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-amqp-protocol-guide#messages
   body: any;
   message_annotations?: AmqpMessageAnnotations;
   application_properties?: Dictionary<any>;

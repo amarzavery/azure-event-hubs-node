@@ -52,9 +52,14 @@ export class CbsClient {
   async init(): Promise<void> {
     try {
       // Acquire the lock and establish an amqp connection if it does not exist.
-      if (!this._context.connection) {
+      if (!this._isConnectionOpen()) {
         debug("[%s] The CBS client is trying to establish an AMQP connection.", this._context.connectionId);
-        await defaultLock.acquire(this._context.connectionLock, () => { return rpc.open(this._context); });
+        const params: rpc.CreateConnectionPrameters = {
+          config: this._context.config,
+          userAgent: ConnectionContext.userAgent
+        };
+        this._context.connection = await defaultLock.acquire(this._context.connectionLock, () => { return rpc.open(params); });
+        this._context.connectionId = this._context.connection.options.id;
       }
 
       if (!this._cbsSenderReceiverLink) {
@@ -132,5 +137,15 @@ export class CbsClient {
       debug(msg);
       throw new Error(msg);
     }
+  }
+
+  private _isConnectionOpen(): boolean {
+    let result: boolean = false;
+    if (this._context && this._context.connection) {
+      if (this._context.connection.is_open && this._context.connection.is_open()) {
+        result = true;
+      }
+    }
+    return result;
   }
 }
